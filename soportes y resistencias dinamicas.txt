@@ -1,0 +1,54 @@
+//@version=5
+// Configuración del Indicador
+indicator("Soportes y Resistencias Dinámicas", shorttitle="S&R Dinámico", overlay=true)
+
+// ===================================
+// 1. INPUTS (Configuración del Usuario)
+// ===================================
+
+// Número de barras hacia atrás para buscar máximos (resistencias) y mínimos (soportes).
+// Un valor más alto significa niveles más "fuertes" o a largo plazo.
+longitud = input.int(200, title="Longitud de Búsqueda (Barras)", minval=50)
+
+// ===================================
+// 2. CÁLCULOS: Identificación de Niveles
+// ===================================
+
+// Máximo más alto en el período de 'longitud'
+resistencia_val = ta.highest(high, longitud)
+// Mínimo más bajo en el período de 'longitud'
+soporte_val = ta.lowest(low, longitud)
+
+// ===================================
+// 3. PLOTEO: Dibujar las Líneas
+// ===================================
+
+// 🔴 Ploteo de la Resistencia Fuerte
+// Usamos plot() con estilo 'line' para dibujar la línea horizontal.
+plot(resistencia_val, color=color.new(color.red, 0), title="Resistencia", linewidth=2, trackprice=true)
+
+// 🟢 Ploteo del Soporte Fuerte
+// Usamos plot() con estilo 'line' para dibujar la línea horizontal.
+plot(soporte_val, color=color.new(color.green, 0), title="Soporte", linewidth=2, trackprice=true)
+
+// Opcional: Rellenar el área entre S&R (Canal)
+// Rellena la zona entre el soporte y la resistencia para un mejor efecto visual.
+fill(plot(resistencia_val), plot(soporte_val), color=color.new(color.gray, 85), title="Zona S&R")
+
+
+// ===================================
+// 4. ETIQUETAS Y ALERTAS (Opcional)
+// ===================================
+
+// Dibujar etiquetas para identificar los niveles
+var label resistencia_label = na
+if barstate.islast
+    label.delete(resistencia_label)
+    resistencia_label := label.new(bar_index, resistencia_val, text="RESISTENCIA", 
+         style=label.style_label_down, color=color.new(color.red, 0), textcolor=color.white, xloc=xloc.bar_index)
+
+var label soporte_label = na
+if barstate.islast
+    label.delete(soporte_label)
+    soporte_label := label.new(bar_index, soporte_val, text="SOPORTE", 
+         style=label.style_label_up, color=color.new(color.green, 0), textcolor=color.white, xloc=xloc.bar_index)

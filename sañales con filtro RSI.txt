@@ -1,0 +1,63 @@
+//@version=5
+// Nombre y configuracion del Indicador
+indicator("RSI con Cruces y Filtro", shorttitle="RSI Senales", overlay=true)
+
+// ===================================
+// 1. INPUTS (Configuracion del Usuario)
+// ===================================
+
+// Parametros del RSI
+longitud_rsi = input.int(14, title="Longitud RSI", minval=1)
+nivel_sobrecompra = input.int(70, title="Nivel de Sobrecompra", minval=50, maxval=90)
+nivel_sobreventa = input.int(30, title="Nivel de Sobrevendida", minval=10, maxval=50)
+
+// ===================================
+// 2. CALCULOS DEL RSI
+// ===================================
+
+// Calcular el RSI usando el precio de cierre
+rsi_val = ta.rsi(close, longitud_rsi)
+
+// ===================================
+// 3. DEFINICION DE SENALES DE COMPRA Y VENTA
+// ===================================
+
+// 🔴 Senal de Venta (Salida de Sobrecompra): 
+// El RSI cruza hacia abajo el nivel de sobrecompra (ej. 70).
+senal_venta = ta.crossunder(rsi_val, nivel_sobrecompra)
+
+// 🟢 Senal de Compra (Salida de Sobrevendida): 
+// El RSI cruza hacia arriba el nivel de sobreventa (ej. 30).
+senal_compra = ta.crossover(rsi_val, nivel_sobreventa)
+
+
+// ===================================
+// 4. PLOTEO DE LAS LINEAS DEL RSI (Panel Inferior)
+// ===================================
+
+plot(rsi_val, color=color.new(color.purple, 0), title="RSI")
+// Lineas de referencia
+hline(nivel_sobrecompra, "Sobrecompra", color=color.new(color.red, 0), linestyle=hline.style_dashed)
+hline(nivel_sobreventa, "Sobrevendida", color=color.new(color.green, 0), linestyle=hline.style_dashed)
+hline(50, "50", color=color.new(color.gray, 50)) 
+
+
+// ===================================
+// 5. PLOTEO DE SENALES EN EL GRAFICO DE PRECIOS
+// ===================================
+
+// Plotea una flecha roja ARRIBA de la vela en la senal de VENTA 
+plotshape(series=senal_venta, 
+     title="Venta RSI", 
+     style=shape.triangledown, 
+     location=location.abovebar, 
+     color=color.new(color.red, 0), 
+     size=size.small)
+
+// Plotea una flecha verde ABAJO de la vela en la senal de COMPRA
+plotshape(series=senal_compra, 
+     title="Compra RSI", 
+     style=shape.triangleup, 
+     location=location.belowbar, 
+     color=color.new(color.green, 0), 
+     size=size.small)
