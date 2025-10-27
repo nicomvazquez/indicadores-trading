@@ -1,0 +1,53 @@
+//@version=5
+// Nombre y configuración del Indicador
+indicator("DMI con Cruces y Filtro ADX", shorttitle="DMI Señales", overlay=true)
+
+// ===================================
+// 1. INPUTS (Configuración del Usuario)
+// ===================================
+
+// Longitud para el cálculo del DMI y ADX
+longitud_dmi = input.int(14, title="Longitud DMI/ADX", minval=1)
+
+// Nivel mínimo de ADX para confirmar una tendencia fuerte y habilitar la señal
+adx_umbral = input.int(20, title="ADX Mínimo de Fuerza", minval=0) 
+
+// ===================================
+// 2. CÁLCULOS DEL DMI
+// ===================================
+
+// ta.dmi() devuelve el +DI, -DI y ADX
+[plusDI, minusDI, adx_val] = ta.dmi(longitud_dmi, longitud_dmi)
+
+// ===================================
+// 3. DEFINICIÓN DE SEÑALES DE CRUCE
+// ===================================
+
+// 🟢 Señal de Compra (Bullish Crossover): +DI cruza por encima de -DI
+compra = ta.crossover(plusDI, minusDI)
+
+// 🔴 Señal de Venta (Bearish Crossover): -DI cruza por encima de +DI
+venta = ta.crossover(minusDI, plusDI)
+
+// ===================================
+// 4. APLICACIÓN DEL FILTRO DE FUERZA (ADX)
+// ===================================
+
+// Una señal de Compra/Venta solo es "fuerte" si el ADX está por encima del umbral.
+// Esto ayuda a evitar señales falsas en mercados laterales.
+compra_fuerte = compra and (adx_val > adx_umbral)
+venta_fuerte = venta and (adx_val > adx_umbral)
+
+// ===================================
+// 5. PLOTEO DE LAS LÍNEAS DMI (Panel Inferior)
+// ===================================
+
+// Nota: Aunque overlay=true arriba indica que las señales irán en el gráfico, 
+// las líneas DMI se plotean por defecto en un panel inferior si no se especifica.
+
+plot(plusDI, color=color.new(color.green, 0), title="+DI")
+plot(minusDI, color=color.new(color.red, 0), title="-DI")
+plot(adx_val, color=color.new(color.blue, 0), title="ADX")
+
+// Opcional: Plotea el nivel de umbral del ADX como referencia
+hline(adx_umbral, "ADX Umbral", color=color.gray, linestyle=hline.style_dashed)
